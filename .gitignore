@@ -1,0 +1,65 @@
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution & Packaging
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+
+# Virtual Environments & UV
+.venv/
+venv/
+env/
+ENV/
+.uv/
+
+# Local Data & Datasets (Prevent accidental commits of large files)
+data/
+*.csv
+*.tsv
+*.zip
+*.gz
+*.parquet
+*.h5
+*.pkl
+
+# Machine Learning Artifacts & Models
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.bin
+*.model
+*.joblib
+logs/
+runs/
+.wandb/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Testing, Linting & Coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Environment Variables & Secrets
+.env
+*.env
+secrets.json
