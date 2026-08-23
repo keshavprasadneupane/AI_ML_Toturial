@@ -1,16 +1,19 @@
 import argparse
-from dataclasses import asdict, fields
 import gzip
-from json import JSONDecodeError, dump, load
 from pathlib import Path
 import sys
 from urllib import request
 from urllib.parse import urlparse
 import zipfile
 
-from toturial.config_schemas import ConfigSchemas as con
+from toturial.config import (
+	ConfigSchemas, 
+	create_default_config, 
+	read_params,
+	get_unique_path
+)
 
-DEFAULT_CONFIG_PATH = con.DEFAULT_CONFIG_DIR / "data_download.json"
+DEFAULT_DATA_CONFIG_PATH: Path = ConfigSchemas.DEFAULT_CONFIG_DIR / "data_download.json"
 
 
 def get_source_extension(url: str) -> str:
@@ -26,91 +29,6 @@ def get_clean_stem(file_stem: str) -> str:
 	while Path(clean_stem).suffix:
 		clean_stem = Path(clean_stem).stem
 	return clean_stem
-
-
-def get_unique_path(base_path: Path) -> Path:
-	"""If file exists, generate a unique path by appending a counter suffix (e.g., file_1.csv)."""
-	if not base_path.exists():
-		return base_path
-
-	counter = 1
-	stem = base_path.stem
-	suffix = base_path.suffix
-	parent = base_path.parent
-
-	while True:
-		new_path = parent / f"{stem}_{counter}{suffix}"
-		if not new_path.exists():
-			return new_path
-		counter += 1
-
-
-def read_params(config_path: Path) -> con.DataDownloadConfig:
-	"""Load configuration parameters from a JSON file into DataDownloadConfig."""
-	try:
-		with open(config_path, "r", encoding="utf-8") as config_file:
-			config = load(config_file)
-
-		if not config or not isinstance(config, dict):
-			print(
-				f"Error: Configuration file '{config_path}' is empty or invalid.",
-				file=sys.stderr,
-			)
-			sys.exit(1)
-
-		allowed_keys = {f.name for f in fields(con.DataDownloadConfig)}
-		unknown_keys = set(config.keys()) - allowed_keys
-		if unknown_keys:
-			print(
-				f"Error: Unknown configuration parameter(s) in '{config_path}': {', '.join(unknown_keys)}",
-				file=sys.stderr,
-			)
-			sys.exit(1)
-
-		return con.DataDownloadConfig(**config)
-
-	except FileNotFoundError:
-		print(f"Error: Configuration file '{config_path}' not found.", file=sys.stderr)
-		sys.exit(1)
-	except JSONDecodeError:
-		print(
-			f"Error: Configuration file '{config_path}' is empty or contains malformed JSON.",
-			file=sys.stderr,
-		)
-		sys.exit(1)
-	except TypeError as e:
-		print(
-			f"Error: Configuration schema mismatch in '{config_path}'.\nDetails: {e}",
-			file=sys.stderr,
-		)
-		sys.exit(1)
-	except Exception as e:
-		print(f"Error reading configuration file: {e}", file=sys.stderr)
-		sys.exit(1)
-
-
-def create_default_config(config_path: Path) -> con.DataDownloadConfig:
-	"""Generate and save a default JSON configuration template when missing."""
-	default_config = con.DataDownloadConfig()
-	config_path.parent.mkdir(parents=True, exist_ok=True)
-
-	data = asdict(default_config)
-
-	try:
-		with open(config_path, "w", encoding="utf-8") as f:
-			dump(data, f, indent=4, default=str)
-		print(
-			f"Warning: Configuration file not found at '{config_path}'.\n"
-			f"Created default template at '{config_path}' for future runs.\n",
-			file=sys.stderr,
-		)
-	except Exception as e:
-		print(
-			f"Warning: Could not save default config to '{config_path}': {e}",
-			file=sys.stderr,
-		)
-
-	return default_config
 
 
 def extract_file(
@@ -172,7 +90,7 @@ def extract_file(
 	print(f"Extraction complete. Removed archive {archive_path.name}.")
 
 
-def get_data(config: con.DataDownloadConfig, overwrite: bool = False) -> None:
+def get_data(config: ConfigSchemas.DataDownloadConfig, overwrite: bool = False) -> None:
 	"""Download data from URL and save/extract it to the specified directory."""
 	save_dir = config.save_dir
 	save_dir.mkdir(parents=True, exist_ok=True)
@@ -218,7 +136,7 @@ if __name__ == "__main__":
 		formatter_class=argparse.RawDescriptionHelpFormatter,
 		epilog=f"""\
 		Examples:
-		# Run using default fallback ({DEFAULT_CONFIG_PATH}):
+		# Run using default fallback ({DEFAULT_DATA_CONFIG_PATH}):
 		python data_download.py
 
 		# Overwrite existing files if they already exist:
@@ -233,7 +151,7 @@ if __name__ == "__main__":
 		"--config",
 		type=Path,
 		default=None,
-		help=f"Path to JSON config file (default: {DEFAULT_CONFIG_PATH}).",
+		help=f"Path to JSON config file (default: {DEFAULT_DATA_CONFIG_PATH}).",
 	)
 	parser.add_argument(
 		"-o",
@@ -252,10 +170,12 @@ if __name__ == "__main__":
 				file=sys.stderr,
 			)
 			sys.exit(1)
-		config = read_params(config_file_path)
-		get_data(config, overwrite=args.overwrite)
-	elif DEFAULT_CONFIG_PATH.exists():
-		config = read_params(DEFAULT_CONFIG_PATH)
-		get_data(config, overwrite=args.overwrite)
+		config = read_params(config_file_path, ConfigSchemas.DataDownloadConfig)
+	elif DEFAULT_DATA_CONFIG_PATH.exists():
+		config = read_params(DEFAULT_DATA_CONFIG_PATH, ConfigSchemas.DataDownloadConfig)
 	else:
-		create_default_config(DEFAULT_CONFIG_PATH)
+		config = create_default_config(DEFAULT_DATA_CONFIG_PATH, ConfigSchemas.DataDownloadConfig)
+		sys.exit(0)  # Exit after creating the default config, as the user should review it before running.
+
+	# run if not creating default config, since the program will exit after creating the default config
+	get_data(config, overwrite=args.overwrite)

@@ -1,6 +1,6 @@
 {
-	"source_url": "https://storage.googleapis.com/cvdf-datasets/mnist/train-images-idx3-ubyte.gz",
+	"source_url": "https://raw.githubusercontent.com/dphi-official/Datasets/master/heart_disease.csv",
 	"save_dir": "data/raw",
-	"file_stem": "train-images-idx3-ubyte",
-	"extract_archive": true
+	"file_stem": "heart_disease",
+	"extract_archive": false
 }

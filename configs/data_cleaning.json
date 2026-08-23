@@ -1,0 +1,39 @@
+{
+    "data_dir": "data/raw",
+    "data_file": "heart_disease.csv",
+    "cleaned_data_dir": "data/cleaned",
+    "cleaned_data_file": "heart_disease_cleaned.csv",
+    "default_numeric_strategy": "mean",
+    "default_string_strategy": "mode",
+    "individual_numeric_strategies": {
+        "trestbps": {
+            "target_type": "integer",
+            "strategy": "mean",
+            "pattern_to_remove": null
+        },
+        "chol": {
+            "target_type": "integer",
+            "strategy": "mean",
+            "pattern_to_remove": null
+        },
+        "thalach": {
+            "target_type": "integer",
+            "strategy": "mean",
+            "pattern_to_remove": null
+        },
+        "oldpeak": {
+            "target_type": "integer",
+            "strategy": "median",
+            "pattern_to_remove": "[^\\d.]"
+        },
+        "ca": {
+            "target_type": "integer",
+            "strategy": "mode",
+            "pattern_to_remove": "[^\\d]"
+        }
+    },
+    "individual_string_strategies": {
+        "thal": "mode",
+        "cp": "mode"
+    }
+}
