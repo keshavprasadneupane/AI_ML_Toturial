@@ -1,6 +1,6 @@
 {
-	"source_url": "https://raw.githubusercontent.com/dphi-official/Datasets/master/heart_disease.csv",
+	"source_url": "https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz",
 	"save_dir": "data/raw",
-	"file_stem": "heart_disease",
+	"file_stem": "mnist",
 	"extract_archive": false
 }

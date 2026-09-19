@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Self
 
-from toturial.config.paths import get_project_root
+from toturial.pipeline.utilities.paths import get_project_root
 
 
 class NumericStrategy(str, Enum):
@@ -61,7 +61,8 @@ class NumericIndividualStrategy:
 
 
 class ConfigSchemas:
-	DEFAULT_CONFIG_DIR: Path = get_project_root() / "configs"
+	CONFIG_DIR_NAME: str = "configs"
+	CONFIG_DIR: Path = get_project_root() / CONFIG_DIR_NAME
 
 	@dataclass(frozen=True)
 	class DataDownloadConfig:

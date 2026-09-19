@@ -1,6 +1,0 @@
-{
-	"source_url": "https://storage.googleapis.com/cvdf-datasets/mnist/train-images-idx3-ubyte.gz",
-	"save_dir": "data/raw",
-	"file_stem": "train-images-idx3-ubyte",
-	"extract_archive": true
-}
